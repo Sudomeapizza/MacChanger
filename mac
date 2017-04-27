@@ -46,7 +46,7 @@ if [ "$#" -eq 0 ]; then
 elif [ "$#" -eq 1 ]; then
         if [ "$1" = "revert" ]; then
                 __ask
-                sudo ifconfig en0 ether "system_profiler SPNetworkDataType | grep MAC | sed 's/ *MAC Address: //'"
+                sudo ifconfig en0 ether "$(system_profiler SPNetworkDataType | grep MAC | sed 's/ *MAC Address: //')"
         elif [ "$1" = "show" ]; then    
                 echo "Your mac address is $(ifconfig en0 | grep ether | sed  "s/        ether //")"
         elif [ "$1" = "change" ]; then
