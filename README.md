@@ -37,7 +37,7 @@ Feeling adventerious? With this command, you can venture forth into the world of
 
 #### `mac revert`
 
-With this nifty command and some trickery, it will go to revert your current mac address to
+With this nifty command and some trickery, it will go to revert your current mac address to your compuers factory address. All in the matter of .5555555 seconds!
 
 ## I want to be specific!
 
