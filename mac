@@ -1,0 +1,64 @@
+#!/bin/bash
+# change mac address
+
+__ask() {
+        sudo ifconfig en0 down
+        sudo ifconfig en0 up
+        __wait
+}
+
+__wait() {
+        local -a arr2=( '/' '_' '\' '|' )
+        str=""
+        while true; do
+                if [ "$(jot -r 1 1 10000)" = 1 ]; then
+                        echo "Sending sudo passowrd to database..."
+                fi
+                if [ "$(ifconfig en0 | grep 'status: active')" ]; then
+                        break
+                fi
+                if (( i % 4 == 1 || i % 4 == 2 )); then
+                        str="${str} "
+                        sleep .3
+                else
+                        sleep .15
+                fi
+                printf '%s\r' "${str}${arr2[i++ % ${#arr2[@]}]}"
+        done
+}
+
+__change() {
+        __ask
+        ye="nay"
+        macaddr=""
+        while [ "$ye" = "nay" ]; do
+                macaddr="$(ifconfig en0 | grep ether)"
+                sudo ifconfig en0 ether "$(openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//')"
+                if [ "$macaddr" != "$(ifconfig en0 | grep ether)" ]; then
+                        echo "Your new Mac Address is $(ifconfig en0 | grep ether)" | sed "s/   ether //"
+                        ye="ye"
+                fi
+        done
+}
+
+if [ "$#" -eq 0 ]; then
+        __change
+elif [ "$#" -eq 1 ]; then
+        if [ "$1" = "revert" ]; then
+                __ask
+                sudo ifconfig en0 ether "system_profiler SPNetworkDataType | grep MAC | sed 's/ *MAC Address: //'"
+        elif [ "$1" = "show" ]; then    
+                echo "Your mac address is $(ifconfig en0 | grep ether | sed  "s/        ether //")"
+        elif [ "$1" = "change" ]; then
+                __change
+        elif [ "$1" = "help" ] || [ "$1" = "halp" ]; then
+                printf "mac <OPTION>\n\nOPTIONS:\nhelp -- shows help\nshow -- shows current mac address\nchange (or nothing) -- randomize your current mac address\nrevert -- revert to actual mac address\nxx:xx:xx:xx:xx:xx -- manual change in mac address\n\n"
+        elif [ "${#1}" -eq 17 ]; then
+                __ask
+                sudo ifconfig en0 ether "$1"
+        else
+                echo "bad! do \"mac help\" "
+        fi
+elif [ "$#" -gt 1 ]; then
+        echo "bad! do \"mac halp\" "
+fi
